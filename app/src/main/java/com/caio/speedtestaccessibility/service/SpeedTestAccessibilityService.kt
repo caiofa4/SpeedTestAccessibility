@@ -16,13 +16,14 @@ import com.caio.speedtestaccessibility.model.SpeedTestResult
 import com.caio.speedtestaccessibility.util.MyApplication
 
 class SpeedTestAccessibilityService : AccessibilityService() {
+    private val tag = "SpeedTestAccessibility"
     private var readyButton = ""
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
-        Log.d("TESTTAG", "onAccessibilityEvent")
+        Log.d(tag, "onAccessibilityEvent")
         val rootNode = rootInActiveWindow
         if (event.packageName == AppPackageNames.ookla_speed_test) {
             rootNode?.let { node ->
-                Log.d("TESTTAG", "testState: $testState")
+                Log.d(tag, "testState: $testState")
                 when (testState) {
                     TestState.IDLE -> {
                         readyButton = ""
@@ -65,7 +66,7 @@ class SpeedTestAccessibilityService : AccessibilityService() {
     }
 
     override fun onInterrupt() {
-        Log.d("TESTTAG", "Service interrupted")
+        Log.d(tag, "Service interrupted")
     }
 
     override fun onServiceConnected() {
@@ -78,7 +79,7 @@ class SpeedTestAccessibilityService : AccessibilityService() {
             packageNames = arrayOf(AppPackageNames.ookla_speed_test)
         }
         serviceInfo = info
-        Log.d("TESTTAG", "Service connected")
+        Log.d(tag, "Service connected")
     }
 
     private fun saveScreenShot() {
@@ -86,7 +87,7 @@ class SpeedTestAccessibilityService : AccessibilityService() {
     }
 
     private fun getValidNode(node: AccessibilityNodeInfo, id: String): AccessibilityNodeInfo? {
-        Log.d("TESTTAG", "getValidNode")
+        Log.d(tag, "getValidNode")
         val nodeList = node.findAccessibilityNodeInfosByViewId(id)
         if (nodeList.isNotEmpty()) {
             return nodeList.first()
@@ -95,7 +96,7 @@ class SpeedTestAccessibilityService : AccessibilityService() {
     }
 
     private fun getValidNodes(node: AccessibilityNodeInfo, id: String): List<AccessibilityNodeInfo>? {
-        Log.d("TESTTAG", "getValidNode")
+        Log.d(tag, "getValidNode")
         var waitTime = 0
         var nodeList = node.findAccessibilityNodeInfosByViewId(id)
 
@@ -104,11 +105,11 @@ class SpeedTestAccessibilityService : AccessibilityService() {
             waitTime += 1
             nodeList = node.findAccessibilityNodeInfosByViewId(id)
         }
-        Log.d("TESTTAG", "waitTime: $waitTime")
+        Log.d(tag, "waitTime: $waitTime")
         if (nodeList == null) {
-            Log.d("TESTTAG", "nodeList is null. size")
+            Log.d(tag, "nodeList is null. size")
         } else {
-            Log.d("TESTTAG", "nodeList is not null. size: ${nodeList.size}")
+            Log.d(tag, "nodeList is not null. size: ${nodeList.size}")
         }
 
         if (nodeList.isNotEmpty()) {
@@ -118,7 +119,7 @@ class SpeedTestAccessibilityService : AccessibilityService() {
     }
 
     private fun isViewOnScreen(node: AccessibilityNodeInfo, id: String): Boolean {
-        Log.d("TESTTAG", "isViewOnScreen")
+        Log.d(tag, "isViewOnScreen")
         val validNode = getValidNode(node, id)
         validNode?.let {
             return it.isVisibleToUser
@@ -127,7 +128,7 @@ class SpeedTestAccessibilityService : AccessibilityService() {
     }
 
     private fun isAppReady(node: AccessibilityNodeInfo): Boolean {
-        Log.d("TESTTAG", "isAppReady")
+        Log.d(tag, "isAppReady")
         val isGoButtonVisible = isViewOnScreen(node, ViewIds.goButton)
         val isTestAgainVisible = isViewOnScreen(node, ViewIds.testAgain)
         if (isGoButtonVisible) readyButton = ViewIds.goButton
@@ -136,24 +137,24 @@ class SpeedTestAccessibilityService : AccessibilityService() {
     }
 
     private fun isTestCompleted(node: AccessibilityNodeInfo): Boolean {
-        Log.d("TESTTAG", "isTestCompleted")
+        Log.d(tag, "isTestCompleted")
         return isViewOnScreen(node, ViewIds.detailedResult)
     }
 
     private fun pressButton(node: AccessibilityNodeInfo, id: String) {
-        Log.d("TESTTAG", "pressButton")
+        Log.d(tag, "pressButton")
         val buttonNode = getValidNode(node, id)
         buttonNode?.performAction(AccessibilityNodeInfo.ACTION_CLICK) ?: kotlin.run {
-            Log.d("TESTTAG", "Button not found")
+            Log.d(tag, "Button not found")
             throw Exception("Button not found")
         }
     }
 
     private fun getTestValues(node: AccessibilityNodeInfo, result: SpeedTestResult) {
-        Log.d("TESTTAG", "getTestValues")
+        Log.d(tag, "getTestValues")
         val list = getValidNodes(node, ViewIds.testResult)
         list?.forEachIndexed { index, itemNode ->
-            Log.d("TESTTAG", "result: ${itemNode.text}")
+            Log.d(tag, "result: ${itemNode.text}")
 
             when (index) {
                 0 -> result.download = itemNode.text.toString().toDouble()
@@ -167,10 +168,10 @@ class SpeedTestAccessibilityService : AccessibilityService() {
     }
 
     private fun getMetricValues(node: AccessibilityNodeInfo, result: SpeedTestResult) {
-        Log.d("TESTTAG", "getMetricValues")
+        Log.d(tag, "getMetricValues")
         val list = getValidNodes(node, ViewIds.metricResult)
         list?.forEachIndexed { index, itemNode ->
-            Log.d("TESTTAG", "metric: ${itemNode.text}")
+            Log.d(tag, "metric: ${itemNode.text}")
 
             when (index) {
                 0 -> result.downloadMetric = itemNode.text.toString()
@@ -180,10 +181,10 @@ class SpeedTestAccessibilityService : AccessibilityService() {
     }
 
     private fun getPingLowValues(node: AccessibilityNodeInfo, result: SpeedTestResult) {
-        Log.d("TESTTAG", "getPingLowValues")
+        Log.d(tag, "getPingLowValues")
         val list = getValidNodes(node, ViewIds.pingLowResult)
         list?.forEachIndexed { index, itemNode ->
-            Log.d("TESTTAG", "low: ${itemNode.text}")
+            Log.d(tag, "low: ${itemNode.text}")
 
             when (index) {
                 0 -> result.responsiveness.ping.idle.low = itemNode.text.toString().toDouble()
@@ -194,10 +195,10 @@ class SpeedTestAccessibilityService : AccessibilityService() {
     }
 
     private fun getPingHighValues(node: AccessibilityNodeInfo, result: SpeedTestResult) {
-        Log.d("TESTTAG", "getPingHighValues")
+        Log.d(tag, "getPingHighValues")
         val list = getValidNodes(node, ViewIds.pingHighResult)
         list?.forEachIndexed { index, itemNode ->
-            Log.d("TESTTAG", "high: ${itemNode.text}")
+            Log.d(tag, "high: ${itemNode.text}")
 
             when (index) {
                 0 -> result.responsiveness.ping.idle.high = itemNode.text.toString().toDouble()
@@ -208,10 +209,10 @@ class SpeedTestAccessibilityService : AccessibilityService() {
     }
 
     private fun getPingJitterValues(node: AccessibilityNodeInfo, result: SpeedTestResult) {
-        Log.d("TESTTAG", "getPingJitterValues")
+        Log.d(tag, "getPingJitterValues")
         val list = getValidNodes(node, ViewIds.pingJitterResult)
         list?.forEachIndexed { index, itemNode ->
-            Log.d("TESTTAG", "jitter: ${itemNode.text}")
+            Log.d(tag, "jitter: ${itemNode.text}")
 
             when (index) {
                 0 -> result.responsiveness.ping.idle.jitter = itemNode.text.toString().toDouble()
@@ -224,16 +225,16 @@ class SpeedTestAccessibilityService : AccessibilityService() {
     private fun getPingMetric(node: AccessibilityNodeInfo, result: SpeedTestResult) {
         val validNode = getValidNode(node, ViewIds.pingMetric)
         validNode?.let {
-            Log.d("TESTTAG", "ping metric: ${it.text}")
+            Log.d(tag, "ping metric: ${it.text}")
             result.responsiveness.ping.metric = it.text.toString()
         }
     }
 
     private fun getConnectionsValues(node: AccessibilityNodeInfo, result: SpeedTestResult) {
-        Log.d("TESTTAG", "getConnectionsValues")
+        Log.d(tag, "getConnectionsValues")
         val list = getValidNodes(node, ViewIds.connectionsResult)
         list?.forEachIndexed { index, itemNode ->
-            Log.d("TESTTAG", "connection: ${itemNode.text}")
+            Log.d(tag, "connection: ${itemNode.text}")
 
             when (index) {
                 0 -> result.responsiveness.connections.type = itemNode.text.toString()
@@ -245,7 +246,7 @@ class SpeedTestAccessibilityService : AccessibilityService() {
     }
 
     private fun getTestResult(node: AccessibilityNodeInfo): SpeedTestResult {
-        Log.d("TESTTAG", "getTestResult")
+        Log.d(tag, "getTestResult")
         val result = SpeedTestResult()
 
         getTestValues(node, result)
@@ -260,7 +261,7 @@ class SpeedTestAccessibilityService : AccessibilityService() {
     }
 
     private fun launchPoCApp() {
-        Log.d("TESTTAG", "launchPoCApp")
+        Log.d(tag, "launchPoCApp")
         val launchIntent = packageManager.getLaunchIntentForPackage("com.caio.speedtestaccessibility")
         launchIntent?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         startActivity(launchIntent)
