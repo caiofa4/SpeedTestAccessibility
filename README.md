@@ -14,3 +14,8 @@ If the user doesn't want to give permission every time, they can run the followi
 - adb shell settings put secure accessibility_enabled 1
 
 - adb shell appops set {packageName} PROJECT_MEDIA allow
+
+https://github.com/user-attachments/assets/45703c79-6e73-4039-b6c0-5c9dc7164c8b
+
+  
+![screenshot_1748435661128_2](https://github.com/user-attachments/assets/c606d7f3-0e85-44af-828e-d62a64533981)
